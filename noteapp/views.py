@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from django.db.models import Q
+from rest_framework.views import APIView
+
 from noteapp.models import Note
-from noteapp.serializers import NoteSerializer
+from noteapp.serializers import NoteSerializer, FileUploadSerializer
 from rest_framework.decorators import api_view
 
 
@@ -52,5 +54,14 @@ def note_detail(request, *args, **kwargs):
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response({"post": f"Note {kwargs.get('slug')} deleted"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class FileUploadView(APIView):
+    def post(self,request, *args,**kwargs):
+        serializer = FileUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

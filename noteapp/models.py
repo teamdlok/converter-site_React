@@ -29,3 +29,8 @@ class Note(models.Model):
                 slug = f'{slug_base}-{get_random_string(5)}'
             self.slug = slug
         super(Note,self).save(*args, **kwargs)
+
+class UploadedFile(models.Model):
+    file = models.FileField(upload_to='uploads/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
