@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'noteapp',
     'rest_framework',
     'corsheaders',
+    'minio',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MINIO_ACCESS_KEY = '6thn8bh6YHFIW1Mp6U8J'
+MINIO_SECRET_KEY = 'eTadexye15jyO0p5Ii7dr8poZijel25LYVZNALRQ'
+MINIO_BUCKET_NAME = 'file-storage'
+MINIO_ENDPOINT = '127.0.0.1:9000'
+MINIO_USE_HTTPS = False

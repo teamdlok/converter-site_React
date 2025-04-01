@@ -1,15 +1,30 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import "./FileUpload.css"
 
 const FileUploadComponent = () => {
     const [file, setFile] = useState(null);
-    const [uploadedFile, setUploadedFile] = useState(null);
     const [uploadStatus, setUploadStatus] = useState('');
     const [error, setError] = useState('');
+    const [uploadedFileUrl, setUploadedFileUrl] = useState('');
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
-        setUploadedFile(null); // Сбрасываем предыдущий файл при выборе нового
+    };
+
+    const uploadToMinio = async (presignedUrl, file) => {
+        try {
+            const response = await axios.put(presignedUrl, file, {
+                headers: {
+                    'Content-Type': file.type,
+                    'x-amz-acl': 'public-read'
+                }
+            });
+            return response.status === 200;
+        } catch (err) {
+            console.error('Minio upload error:', err);
+            return false;
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -19,21 +34,33 @@ const FileUploadComponent = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('file', file);
-
         try {
-            setUploadStatus('Uploading...');
-            const response = await axios.post('http://localhost:8000/api/upload/', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            setUploadStatus('Generating presigned URL...');
             
-            setUploadStatus('Upload successful!');
-            setError('');
-            setUploadedFile(response.data); // Сохраняем информацию о загруженном файле
-            console.log('File uploaded:', response.data);
+            // Step 1: Get presigned URL from DRF
+            const presignedResponse = await axios.post(
+                'http://127.0.0.1:8000/api/generate-presigned-url/',
+                {
+                    file_name: file.name,
+                    content_type: file.type
+                }
+            );
+
+            // Step 2: Upload directly to Minio
+            setUploadStatus('Uploading to Minio...');
+            const uploadSuccess = await uploadToMinio(
+                presignedResponse.data.presigned_url,
+                file
+            );
+
+            if (uploadSuccess) {
+                console.log(presignedResponse.data)
+                setUploadStatus('Upload successful!');
+                setUploadedFileUrl(presignedResponse.data.file_url);
+                setError('');
+            } else {
+                throw new Error('Failed to upload to Minio');
+            }
         } catch (err) {
             setError('Error uploading file');
             setUploadStatus('');
@@ -41,96 +68,42 @@ const FileUploadComponent = () => {
         }
     };
 
-    // Функция для определения типа контента
-    const renderFilePreview = () => {
-        if (!uploadedFile) return null;
+    const renderPreview = () => {
+        if (!uploadedFileUrl) return null;
 
-        const fileUrl = uploadedFile.file;
-        const fileType = file.type.split('/')[0]; // Получаем общий тип (image, video и т.д.)
-        const fileName = file.name.toLowerCase();
-
+        const fileType = file.type.split('/')[0];
+        
         return (
-            <div className="file-preview">
+            <div className="preview">
                 <h3>Uploaded File:</h3>
                 {fileType === 'image' && (
-                    <img 
-                        src={`http://127.0.0.1:8000${fileUrl}`} 
-                        alt="Uploaded content" 
-                        style={{ maxWidth: '100%', maxHeight: '400px' }}
-                    />
+                    <img src={`http://${uploadedFileUrl}`} style={{ maxWidth: '100%' }} />
                 )}
-                
                 {fileType === 'video' && (
                     <video controls style={{ maxWidth: '100%' }}>
-                        <source src={fileUrl} type={file.type} />
-                        Your browser does not support the video tag.
+                        <source src={uploadedFileUrl} type={file.type} />
                     </video>
                 )}
-
-                {(fileType !== 'image' && fileType !== 'video') && (
-                    <div>
-                        <p>File type: {file.type}</p>
-                        <a 
-                            href={fileUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            download
-                        >
-                            Download File
-                        </a>
-                    </div>
+                {fileType !== 'image' && fileType !== 'video' && (
+                    <a href={uploadedFileUrl} target="_blank" rel="no open">
+                        View File
+                    </a>
                 )}
-
-                <div className="file-info">
-                    <p>File name: {uploadedFile.file.split('/').pop()}</p>
-                    <p>File size: {(file.size / 1024).toFixed(2)} KB</p>
-                    <p>Uploaded at: {new Date(uploadedFile.uploaded_at).toLocaleString()}</p>
-                </div>
             </div>
         );
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-            <h2>File Upload</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-                <input 
-                    type="file" 
-                    onChange={handleFileChange} 
-                    style={{ margin: '10px 0' }}
-                />
-                <button 
-                    type="submit" 
-                    style={{
-                        padding: '10px 20px',
-                        background: '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Upload
-                </button>
+        <div>
+            <h2 className='headertext'>Upload File to Minio</h2>
+            <form onSubmit={handleSubmit}>
+                <input type="file" onChange={handleFileChange} />
+                <button type="submit">Upload</button>
             </form>
-
-            {uploadStatus && (
-                <p style={{ color: '#4CAF50' }}>{uploadStatus}</p>
-            )}
-
-            {error && (
-                <p style={{ color: 'red' }}>{error}</p>
-            )}
-
-            {file && !uploadedFile && (
-                <div style={{ margin: '20px 0' }}>
-                    <p>Selected File: {file.name}</p>
-                    <p>File Size: {(file.size / 1024).toFixed(2)} KB</p>
-                    <p>File Type: {file.type}</p>
-                </div>
-            )}
-
-            {uploadedFile && renderFilePreview()}
+            
+            {uploadStatus && <p>{uploadStatus}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {renderPreview()}
         </div>
     );
 };

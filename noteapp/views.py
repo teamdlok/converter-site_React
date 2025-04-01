@@ -1,13 +1,21 @@
+import logging
+import uuid
+from datetime import timedelta
+
 from django.shortcuts import render
+from minio import S3Error
 from rest_framework import status
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.views import APIView
 
+from converter_site_React import settings
 from noteapp.models import Note
 from noteapp.serializers import NoteSerializer, FileUploadSerializer
 from rest_framework.decorators import api_view
+from utils.minio_client import get_minio_client
 
+logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def search_notes(request):
@@ -64,4 +72,21 @@ class FileUploadView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class GeneratePresignedURL(APIView):
 
+    def post(self, request):
+        file_name = request.data.get('file_name', str(uuid.uuid4()))
+
+        try:
+            minio_client = get_minio_client()
+            presigned_url = minio_client.presigned_put_object(
+                settings.MINIO_BUCKET_NAME,
+                file_name,
+                expires=timedelta(hours=1))
+            return Response({
+                "presigned_url": presigned_url,
+                'file_url': f"{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET_NAME}/{file_name}"
+            }, status=status.HTTP_200_OK)
+
+        except Exception:
+            return Response({'error': str(Exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
