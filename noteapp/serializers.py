@@ -12,3 +12,13 @@ class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadedFile
         fields = '__all__'
+
+
+#Проверяем celery
+from .models import ConversionTask
+
+class ConversionTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversionTask
+        fields = ['task_id', 'status', 'input_file', 'result_file', 'created_at']
+        read_only_fields = ['task_id', 'status', 'result_file', 'created_at']

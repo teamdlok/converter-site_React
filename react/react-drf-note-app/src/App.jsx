@@ -9,6 +9,7 @@ import EditNotePage from './pages/EditNotePage.jsx'
 import axios from 'axios'
 import { toast } from 'react-toastify';
 import FileUploadComponent from './pages/FileUpload.jsx'
+import CeleryTaskChecker from './pages/CeleryTest.jsx'
 
 const App = () => {
 
@@ -104,7 +105,8 @@ const App = () => {
         { path: "add-note", element: <AddNotePage addNote={addNote}/> },
         { path: "edit-note/:slug", element: <EditNotePage updateNote={updateNote} /> },
         { path: "notes/:slug", element: <NoteDetailPage deleteNote={deleteNote} />  },
-        { path: "file-upload/", element: <FileUploadComponent/>}
+        { path: "file-upload/", element: <FileUploadComponent/>},
+        { path: "celery-test/", element: <CeleryTaskChecker/>}
       ]
     }
   ]);

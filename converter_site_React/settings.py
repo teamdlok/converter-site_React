@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'minio',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,11 @@ MINIO_SECRET_KEY = 'eTadexye15jyO0p5Ii7dr8poZijel25LYVZNALRQ'
 MINIO_BUCKET_NAME = 'file-storage'
 MINIO_ENDPOINT = '127.0.0.1:9000'
 MINIO_USE_HTTPS = False
+
+# Настройки Celery
+CELERY_BROKER_URL = 'redis://:passwd@176.222.54.127:6379/0'  # URL брокера
+CELERY_RESULT_BACKEND = 'django-db'  # Хранение результатов в БД
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow'

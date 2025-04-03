@@ -1,7 +1,6 @@
 import logging
 import uuid
 from datetime import timedelta
-
 from django.shortcuts import render
 from minio import S3Error
 from rest_framework import status
@@ -16,6 +15,14 @@ from rest_framework.decorators import api_view
 from utils.minio_client import get_minio_client
 
 logger = logging.getLogger(__name__)
+
+
+from rest_framework import generics, status
+from rest_framework.response import Response
+from .models import ConversionTask
+from .serializers import ConversionTaskSerializer
+from .tasks import process_file_task
+import uuid
 
 @api_view(['GET'])
 def search_notes(request):
@@ -90,3 +97,27 @@ class GeneratePresignedURL(APIView):
 
         except Exception:
             return Response({'error': str(Exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Проверяем celery
+
+class ConversionTaskCreateView(generics.CreateAPIView):
+    queryset = ConversionTask.objects.all()
+    serializer_class = ConversionTaskSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Создаем запись задачи
+        task = ConversionTask.objects.create(
+            task_id=str(uuid.uuid4()),
+            input_file=request.data.get('input_file')
+        )
+
+        # Запускаем Celery задачу
+        process_file_task.delay(task.task_id)
+
+        serializer = self.get_serializer(task)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class ConversionTaskDetailView(generics.RetrieveAPIView):
+    queryset = ConversionTask.objects.all()
+    serializer_class = ConversionTaskSerializer
+    lookup_field = 'task_id'

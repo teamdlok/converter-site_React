@@ -38,6 +38,17 @@ const NavBar = ({searchText, handleSearchText}) => {
                 <FaSquarePlus /> Add Notes
               </button>
             </Link>
+
+            <Link to="/file-upload"  style={{ textDecoration: "none" }}>
+              <button
+                className="btn btn-outline-primary btn-md"
+                type="button"
+               
+              >
+                <FaSquarePlus /> Add file to minio storage
+              </button>
+            </Link>
+
           </div>
         </nav>
     )

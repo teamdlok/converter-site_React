@@ -17,7 +17,9 @@ const FileUploadComponent = () => {
             const response = await axios.put(presignedUrl, file, {
                 headers: {
                     'Content-Type': file.type,
-                    'x-amz-acl': 'public-read'
+                    'x-amz-acl': 'public-read',
+                    "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
+                    "x-amz-disable-multipart": "true" //Отключили multipart чтобы объекты нормаль отображались в файловой системе
                 }
             });
             return response.status === 200;
