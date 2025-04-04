@@ -90,6 +90,9 @@ class GeneratePresignedURL(APIView):
                 settings.MINIO_BUCKET_NAME,
                 file_name,
                 expires=timedelta(hours=1))
+
+
+
             return Response({
                 "presigned_url": presigned_url,
                 'file_url': f"{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET_NAME}/{file_name}"
@@ -98,6 +101,8 @@ class GeneratePresignedURL(APIView):
         except Exception:
             return Response({'error': str(Exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 # Проверяем celery
 
 class ConversionTaskCreateView(generics.CreateAPIView):
@@ -105,10 +110,11 @@ class ConversionTaskCreateView(generics.CreateAPIView):
     serializer_class = ConversionTaskSerializer
 
     def create(self, request, *args, **kwargs):
+        file_url = request.data.get("file_url")
         # Создаем запись задачи
         task = ConversionTask.objects.create(
             task_id=str(uuid.uuid4()),
-            input_file=request.data.get('input_file')
+            input_file=file_url,
         )
 
         # Запускаем Celery задачу

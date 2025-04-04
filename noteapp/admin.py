@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Note, UploadedFile
+from .models import Note, UploadedFile, ConversionTask
 
 
 # Register your models here.
@@ -9,3 +9,4 @@ class NoteAdmin(admin.ModelAdmin):
 
 admin.site.register(Note, NoteAdmin)
 admin.site.register(UploadedFile)
+admin.site.register(ConversionTask)

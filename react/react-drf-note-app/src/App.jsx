@@ -10,6 +10,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify';
 import FileUploadComponent from './pages/FileUpload.jsx'
 import CeleryTaskChecker from './pages/CeleryTest.jsx'
+import FileConvertation from './pages/FileConvertation.jsx'
 
 const App = () => {
 
@@ -106,7 +107,8 @@ const App = () => {
         { path: "edit-note/:slug", element: <EditNotePage updateNote={updateNote} /> },
         { path: "notes/:slug", element: <NoteDetailPage deleteNote={deleteNote} />  },
         { path: "file-upload/", element: <FileUploadComponent/>},
-        { path: "celery-test/", element: <CeleryTaskChecker/>}
+        { path: "celery-test/", element: <CeleryTaskChecker/>},
+        { path: "file-convertation/", element: <FileConvertation/>},
       ]
     }
   ]);

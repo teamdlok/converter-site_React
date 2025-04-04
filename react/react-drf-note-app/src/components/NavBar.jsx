@@ -29,7 +29,7 @@ const NavBar = ({searchText, handleSearchText}) => {
               {/* <button className="btn btn-outline-primary btn-md" type="button">Add</button> */}
             </div>
     
-            <Link to="/add-note"  style={{ textDecoration: "none" }}>
+            <Link to="/add-note/"  style={{ textDecoration: "none" }}>
               <button
                 className="btn btn-outline-primary btn-md"
                 type="button"
@@ -39,13 +39,33 @@ const NavBar = ({searchText, handleSearchText}) => {
               </button>
             </Link>
 
-            <Link to="/file-upload"  style={{ textDecoration: "none" }}>
+            <Link to="/file-upload/"  style={{ textDecoration: "none" }}>
               <button
                 className="btn btn-outline-primary btn-md"
                 type="button"
                
               >
                 <FaSquarePlus /> Add file to minio storage
+              </button>
+            </Link>
+
+            <Link to="/celery-test/"  style={{ textDecoration: "none" }}>
+              <button
+                className="btn btn-outline-primary btn-md"
+                type="button"
+               
+              >
+                <FaSquarePlus /> Testing celery
+              </button>
+            </Link>
+
+            <Link to="/file-convertation/"  style={{ textDecoration: "none" }}>
+              <button
+                className="btn btn-outline-primary btn-md"
+                type="button"
+               
+              >
+                <FaSquarePlus /> Testing celery
               </button>
             </Link>
 
