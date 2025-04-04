@@ -21,7 +21,7 @@ def process_file_task(self, task_id):
 
         stream = ffmpeg.input(in_filename)
         stream = ffmpeg.output(stream, out_filename)
-        ffmpeg.run(stream)
+        ffmpeg.run(stream, overwrite_output=True)
 
         minio_client = get_minio_client()
         minio_client.fput_object(settings.MINIO_BUCKET_NAME, "file_uploaded.webp", out_filename)

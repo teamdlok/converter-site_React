@@ -38,7 +38,8 @@ const FileUploadComponent = () => {
 
         try {
             setUploadStatus('Generating presigned URL...');
-            
+            setFile(null);
+            document.querySelector('input[type="file"]').value = ''; // Очищаем поле ввода
             // Step 1: Get presigned URL from DRF
             const presignedResponse = await axios.post(
                 'http://127.0.0.1:8000/api/generate-presigned-url/',
@@ -83,11 +84,11 @@ const FileUploadComponent = () => {
                 )}
                 {fileType === 'video' && (
                     <video controls style={{ maxWidth: '100%' }}>
-                        <source src={uploadedFileUrl} type={file.type} />
+                        <source src={`http://${uploadedFileUrl}`} type={file.type} />
                     </video>
                 )}
                 {fileType !== 'image' && fileType !== 'video' && (
-                    <a href={uploadedFileUrl} target="_blank" rel="no open">
+                    <a href={`http://${uploadedFileUrl}`} target="_blank" rel="no open">
                         View File
                     </a>
                 )}
