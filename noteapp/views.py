@@ -111,6 +111,7 @@ class ConversionTaskCreateView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         file_url = request.data.get("file_url")
+        target_format = request.data.get("target_format")
         # Создаем запись задачи
         task = ConversionTask.objects.create(
             task_id=str(uuid.uuid4()),
@@ -118,7 +119,7 @@ class ConversionTaskCreateView(generics.CreateAPIView):
         )
 
         # Запускаем Celery задачу
-        process_file_task.delay(task.task_id, file_url)
+        process_file_task.delay(task.task_id, file_url, target_format)
 
         serializer = self.get_serializer(task)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

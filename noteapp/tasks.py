@@ -9,22 +9,24 @@ import time
 
 
 @shared_task(bind=True)
-def process_file_task(self, task_id, input_file_url):
+def process_file_task(self, task_id, input_file_url, target_format):
     task = ConversionTask.objects.get(task_id=task_id )
     try:
         # Обновляем статус
         task.status = 'PROCESSING'
         task.save()
 
+        input_file_name = str(input_file_url.split("/")[-1]).split(".")[0]
+
         in_filename = f"http://{input_file_url}"
-        out_filename = f"{settings.MEDIA_ROOT}/uploads/video.mp3"
+        out_filename = f"{settings.MEDIA_ROOT}/uploads/{input_file_name}.{target_format}"
 
         stream = ffmpeg.input(in_filename)
         stream = ffmpeg.output(stream, out_filename)
         ffmpeg.run(stream, overwrite_output=True)
 
         minio_client = get_minio_client()
-        output_filename = str(out_filename.split("/")[-1])
+        output_filename = f"{input_file_name}.{target_format}"
         minio_client.fput_object(settings.MINIO_BUCKET_NAME, output_filename, out_filename)
         print("Successfuly uploaded")
 
