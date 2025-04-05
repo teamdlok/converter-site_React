@@ -65,7 +65,7 @@ const NavBar = ({searchText, handleSearchText}) => {
                 type="button"
                
               >
-                <FaSquarePlus /> Testing celery
+                <FaSquarePlus /> Celery and minio test
               </button>
             </Link>
 

@@ -79,6 +79,7 @@ class FileUploadView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class GeneratePresignedURL(APIView):
 
     def post(self, request):
@@ -91,8 +92,6 @@ class GeneratePresignedURL(APIView):
                 file_name,
                 expires=timedelta(hours=1))
 
-
-
             return Response({
                 "presigned_url": presigned_url,
                 'file_url': f"{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET_NAME}/{file_name}"
@@ -100,6 +99,7 @@ class GeneratePresignedURL(APIView):
 
         except Exception:
             return Response({'error': str(Exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
@@ -118,7 +118,7 @@ class ConversionTaskCreateView(generics.CreateAPIView):
         )
 
         # Запускаем Celery задачу
-        process_file_task.delay(task.task_id)
+        process_file_task.delay(task.task_id, file_url)
 
         serializer = self.get_serializer(task)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
